@@ -14,18 +14,22 @@ var DB *sql.DB
 
 func ConnectDB() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("❌ Failed to load .env")
+		log.Fatal("Failed to load .env")
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 
 	var err error
 	DB, err = sql.Open("mysql", dsn)
-	if err != nil || DB.Ping() != nil {
-		log.Fatal("❌ Failed to connect DB:", err)
+	if err != nil {
+		log.Fatal("sql.Open error:", err)
 	}
-	log.Println("✅ DB connected")
+
+	if pingErr := DB.Ping(); pingErr != nil {
+		log.Fatal("DB.Ping error:", pingErr)
+	}
+	log.Println("DB connected")
 	createTables()
 }
 
@@ -40,7 +44,7 @@ func createTables() {
 	)`
 
 	if _, err := DB.Exec(shipmentTable); err != nil {
-		log.Fatal("❌ Failed to create shipments table:", err)
+		log.Fatal("Failed to create shipments table:", err)
 	}
-	log.Println("✅ Shipments table ensured")
+	log.Println("Shipments table ensured")
 }

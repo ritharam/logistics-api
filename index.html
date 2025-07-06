@@ -1,0 +1,24 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shipment Recommendation</title>
+  <style>
+    body { font-family: Arial; background-color: #f8f9fa; padding: 20px; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+    h2 { color: #333; }
+    .label { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📦 Shipment Recommendation</h2>
+    <p><span class="label">Origin:</span> {{.origin}}</p>
+    <p><span class="label">Destination:</span> {{.destination}}</p>
+    <p><span class="label">Urgency:</span> {{.urgency}}</p>
+    <p><a href="{{.link}}" target="_blank">📍 View Route in Google Maps</a></p>
+    <p>Thank you for using our Logistics Intelligence API!</p>
+  </div>
+</body>
+</html>

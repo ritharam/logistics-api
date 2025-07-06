@@ -1,54 +1,49 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
+	"fmt"
 	"log"
 	"net/http"
-	"sort"
+	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
-	"github.com/yourusername/logistics-api/database"
-	"github.com/yourusername/logistics-api/functions"
-	"github.com/yourusername/logistics-api/models"
-	"github.com/yourusername/logistics-api/scraper"
+	"github.com/ritharam/logistics-api/database"
+	"github.com/ritharam/logistics-api/functions"
+	"github.com/ritharam/logistics-api/models"
 )
-
-func recommendHandler(w http.ResponseWriter, r *http.Request) {
-	var req models.Shipment
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	eta, err := scraper.GetTravelTime(req.Origin, req.Destination)
-	if err != nil {
-		http.Error(w, "Maps API failed", http.StatusInternalServerError)
-		return
-	}
-
-	options := []models.ShippingOption{
-		{"DHL", eta + 10, 150.0, 0},
-		{"FedEx", eta + 5, 180.0, 0},
-		{"UPS", eta + 15, 130.0, 0},
-	}
-
-	for i := range options {
-		functions.ScoreOption(&options[i], req.Urgency)
-	}
-	sort.Slice(options, func(i, j int) bool { return options[i].Score > options[j].Score })
-	database.InsertShipment(req)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(options)
-}
 
 func main() {
 	godotenv.Load()
 	database.ConnectDB()
+
+	if len(os.Args) > 1 && os.Args[1] == "add" {
+		s := bufio.NewScanner(os.Stdin)
+		var ship models.Shipment
+		fmt.Print("Enter Origin: ")
+		s.Scan()
+		ship.Origin = s.Text()
+		fmt.Print("Enter Destination: ")
+		s.Scan()
+		ship.Destination = s.Text()
+		fmt.Print("Enter Weight (kg): ")
+		s.Scan()
+		fmt.Sscan(s.Text(), &ship.Weight)
+		fmt.Print("Enter Urgency (low/medium/high): ")
+		s.Scan()
+		ship.Urgency = strings.ToLower(s.Text())
+		fmt.Print("Enter Your Email: ")
+		s.Scan()
+		email := s.Text()
+		functions.HandleShipment(ship, email)
+		return
+	}
+
 	r := mux.NewRouter()
-	r.HandleFunc("/api/recommend", recommendHandler).Methods("POST")
+	r.HandleFunc("/api/recommend", functions.RecommendHandler).Methods("POST")
 
 	log.Println("🚀 Server running at :8080")
 	http.ListenAndServe(":8080", r)

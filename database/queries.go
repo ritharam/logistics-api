@@ -2,7 +2,7 @@ package database
 
 import (
 	"log"
-	"github.com/yourusername/logistics-api/models"
+	"github.com/ritharam/logistics-api/models"
 )
 
 func InsertShipment(s models.Shipment) (int64, error) {

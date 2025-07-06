@@ -1,6 +1,6 @@
 package database
 
-import "github.com/yourusername/logistics-api/models"
+import "github.com/ritharam/logistics-api/models"
 
 func SaveAndFetchShipment(s models.Shipment) ([]models.ShippingOption, error) {
 	_, err := InsertShipment(s)
